@@ -6,11 +6,23 @@
   "parameters": {
     "environment": "Passage limited to narrow slit",
     "robot_type": "Quadrotor with 2D boundary",
-    "num_obstacles": Narrow passage,
+    "num_obstacles": NA,
     "environment_size": "5m x 5m",
     "max_velocity": "12 m/s",
     "computation_time": "2.5 seconds"
   },
+  "views": [
+    {
+      "name": "Front View",
+      "video": "NarrowPassage_FrontView.mp4",
+      "description": "Bird's eye view of the quadrotor's trajectory"
+    },
+    {
+      "name": "Top View",
+      "video": "NarrowPassage_TopView.mp4",
+      "description": "Top view of the quadrotor's trajectory"
+    }
+  ],
   "results": {
     "success": true,
     "path_length": "~18 meters",
