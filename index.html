@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCOA - Simulation Results Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            padding: 40px 20px;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin-bottom: 20px;
+        }
+
+        .paper-link {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .paper-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .simulation-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .simulation-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-media {
+            width: 100%;
+            height: 250px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-media video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-controls-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .simulation-card:hover .video-controls-hint {
+            opacity: 1;
+        }
+
+        .card-content {
+            padding: 25px;
+        }
+
+        .card-content h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .card-content p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .meta-tag {
+            background: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: white;
+            padding: 60px 20px;
+        }
+
+        .empty-state h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 30px;
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filter-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 RCOA Simulations</h1>
+            <p>Relaxed Nonconvex Obstacle Avoidance</p>
+            <a href="https://github.com/rtapia8484/RCOA" class="paper-link">📄 View on GitHub</a>
+        </header>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterGallery('all')">All Scenarios</button>
+            <button class="filter-btn" onclick="filterGallery('dense')">Dense Obstacles</button>
+            <button class="filter-btn" onclick="filterGallery('narrow')">Narrow Passages</button>
+            <button class="filter-btn" onclick="filterGallery('dynamic')">Dynamic Obstacles</button>
+        </div>
+
+        <div class="gallery" id="gallery">
+            <div class="empty-state">
+                <h2>📂 No simulations yet</h2>
+                <p>Check back soon! Add simulation results to the <code>/simulations</code> folder.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>RCOA Simulation Results Gallery | Last updated: 2026-07-20</p>
+        </footer>
+    </div>
+
+    <script>
+        // Simulation data - will be loaded from metadata.json files
+        const simulations = [
+            {
+                id: 1,
+                title: "Dense Obstacle Environment",
+                description: "Robot navigating through densely packed obstacles using RCOA formulation",
+                category: "dense",
+                date: "2026-07-20",
+                video: "simulations/scenario_1/results.mp4",
+                tags: ["Dense", "Complex"],
+                environment: "Indoor"
+            },
+            {
+                id: 2,
+                title: "Narrow Passage Navigation",
+                description: "Successfully navigating through narrow passages with minimal clearance",
+                category: "narrow",
+                date: "2026-07-20",
+                video: "simulations/scenario_2/results.mp4",
+                tags: ["Narrow", "Challenging"],
+                environment: "Corridor"
+            }
+        ];
+
+        function renderGallery(filter = 'all') {
+            const gallery = document.getElementById('gallery');
+            const filtered = filter === 'all' 
+                ? simulations 
+                : simulations.filter(sim => sim.category === filter);
+
+            if (filtered.length === 0) {
+                gallery.innerHTML = `
+                    <div style="grid-column: 1/-1;">
+                        <div class="empty-state">
+                            <h2>No simulations found</h2>
+                            <p>Try a different filter or check back later.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            gallery.innerHTML = filtered.map(sim => `
+                <div class="simulation-card">
+                    <div class="card-media">
+                        <video controls muted>
+                            <source src="${sim.video}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="video-controls-hint">▶ Click to play</div>
+                    </div>
+                    <div class="card-content">
+                        <h3>${sim.title}</h3>
+                        <p>${sim.description}</p>
+                        <div class="card-meta">
+                            <span class="meta-tag">📍 ${sim.environment}</span>
+                            <span class="meta-tag">📅 ${sim.date}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterGallery(category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderGallery(category);
+        }
+
+        // Initial render
+        renderGallery();
+
+        // Load simulations from metadata files (future enhancement)
+        async function loadSimulations() {
+            try {
+                // This will be populated as you add metadata.json files
+                // const response = await fetch('simulations/manifest.json');
+                // const data = await response.json();
+                // simulations = data;
+                // renderGallery();
+            } catch (error) {
+                console.log('Manifest not found yet. Using default simulations.');
+            }
+        }
+
+        loadSimulations();
+    </script>
+</body>
+</html>
