@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #1E293B 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -269,7 +269,6 @@
             <button class="filter-btn active" onclick="filterGallery('all')">All Scenarios</button>
             <button class="filter-btn" onclick="filterGallery('dense')">Dense Obstacles</button>
             <button class="filter-btn" onclick="filterGallery('narrow')">Narrow Passages</button>
-            <button class="filter-btn" onclick="filterGallery('dynamic')">Dynamic Obstacles</button>
         </div>
 
         <div class="gallery" id="gallery">
@@ -295,13 +294,13 @@
                 date: "2026-07-20",
                 views: [
                     {
-                        name: "Top-Down View",
-                        video: "simulations/scenario_1/results_topdown.mp4",
+                        name: "Front View",
+                        video: "simulations/Narrow Passage/NarrowPassage_FrontView.mp4",
                         description: "Bird's eye view of the robot's trajectory"
                     },
                     {
-                        name: "Side View",
-                        video: "simulations/scenario_1/results_sideview.mp4",
+                        name: "Top View",
+                        video: "simulations/Narrow Passage/NarrowPassage_TopView.mp4",
                         description: "Side perspective showing obstacle clearance"
                     }
                 ],
