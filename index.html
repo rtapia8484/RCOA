@@ -106,6 +106,37 @@
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
 
+        .view-tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            overflow-x: auto;
+        }
+
+        .view-tab {
+            flex: 1;
+            min-width: 100px;
+            background: #f5f5f5;
+            border: none;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .view-tab:hover {
+            background: #efefef;
+        }
+
+        .view-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
         .card-media {
             width: 100%;
             height: 250px;
@@ -138,6 +169,14 @@
 
         .simulation-card:hover .video-controls-hint {
             opacity: 1;
+        }
+
+        .view-description {
+            font-size: 0.8em;
+            color: #999;
+            padding: 5px 0;
+            margin-top: 5px;
+            font-style: italic;
         }
 
         .card-content {
@@ -209,6 +248,12 @@
             .filter-btn {
                 width: 100%;
             }
+
+            .view-tab {
+                flex: 1;
+                padding: 10px 8px;
+                font-size: 0.8em;
+            }
         }
     </style>
 </head>
@@ -240,7 +285,7 @@
     </div>
 
     <script>
-        // Simulation data - will be loaded from metadata.json files
+        // Simulation data structure with multiple views support
         const simulations = [
             {
                 id: 1,
@@ -248,7 +293,18 @@
                 description: "Robot navigating through densely packed obstacles using RCOA formulation",
                 category: "dense",
                 date: "2026-07-20",
-                video: "simulations/scenario_1/results.mp4",
+                views: [
+                    {
+                        name: "Top-Down View",
+                        video: "simulations/scenario_1/results_topdown.mp4",
+                        description: "Bird's eye view of the robot's trajectory"
+                    },
+                    {
+                        name: "Side View",
+                        video: "simulations/scenario_1/results_sideview.mp4",
+                        description: "Side perspective showing obstacle clearance"
+                    }
+                ],
                 tags: ["Dense", "Complex"],
                 environment: "Indoor"
             },
@@ -258,7 +314,13 @@
                 description: "Successfully navigating through narrow passages with minimal clearance",
                 category: "narrow",
                 date: "2026-07-20",
-                video: "simulations/scenario_2/results.mp4",
+                views: [
+                    {
+                        name: "Main View",
+                        video: "simulations/scenario_2/results.mp4",
+                        description: "Primary visualization of narrow passage navigation"
+                    }
+                ],
                 tags: ["Narrow", "Challenging"],
                 environment: "Corridor"
             }
@@ -282,25 +344,72 @@
                 return;
             }
 
-            gallery.innerHTML = filtered.map(sim => `
-                <div class="simulation-card">
-                    <div class="card-media">
-                        <video controls muted>
-                            <source src="${sim.video}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                        <div class="video-controls-hint">▶ Click to play</div>
-                    </div>
-                    <div class="card-content">
-                        <h3>${sim.title}</h3>
-                        <p>${sim.description}</p>
-                        <div class="card-meta">
-                            <span class="meta-tag">📍 ${sim.environment}</span>
-                            <span class="meta-tag">📅 ${sim.date}</span>
+            gallery.innerHTML = filtered.map(sim => {
+                const hasMultipleViews = sim.views && sim.views.length > 1;
+                const firstView = sim.views[0];
+                
+                return `
+                    <div class="simulation-card" data-sim-id="${sim.id}">
+                        ${hasMultipleViews ? `
+                            <div class="view-tabs">
+                                ${sim.views.map((view, idx) => `
+                                    <button class="view-tab ${idx === 0 ? 'active' : ''}" 
+                                            onclick="switchView(${sim.id}, ${idx})">
+                                        ${view.name}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="card-media">
+                            <video id="video-${sim.id}" controls muted>
+                                <source src="${firstView.video}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="video-controls-hint">▶ Click to play</div>
+                        </div>
+                        ${hasMultipleViews ? `
+                            <div style="padding: 0 25px 10px;">
+                                <div class="view-description" id="view-desc-${sim.id}">
+                                    ${firstView.description}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="card-content">
+                            <h3>${sim.title}</h3>
+                            <p>${sim.description}</p>
+                            <div class="card-meta">
+                                <span class="meta-tag">📍 ${sim.environment}</span>
+                                <span class="meta-tag">📅 ${sim.date}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        function switchView(simId, viewIndex) {
+            const simulation = simulations.find(s => s.id === simId);
+            if (!simulation || !simulation.views[viewIndex]) return;
+
+            const view = simulation.views[viewIndex];
+            const videoElement = document.getElementById(`video-${simId}`);
+            const descElement = document.getElementById(`view-desc-${simId}`);
+
+            // Update video source
+            videoElement.src = view.video;
+            videoElement.load();
+
+            // Update description if exists
+            if (descElement) {
+                descElement.textContent = view.description;
+            }
+
+            // Update active tab styling
+            const card = document.querySelector(`[data-sim-id="${simId}"]`);
+            const tabs = card.querySelectorAll('.view-tab');
+            tabs.forEach((tab, idx) => {
+                tab.classList.toggle('active', idx === viewIndex);
+            });
         }
 
         function filterGallery(category) {
@@ -316,10 +425,10 @@
         async function loadSimulations() {
             try {
                 // This will be populated as you add metadata.json files
+                // Example implementation:
                 // const response = await fetch('simulations/manifest.json');
                 // const data = await response.json();
-                // simulations = data;
-                // renderGallery();
+                // This would dynamically load all scenarios
             } catch (error) {
                 console.log('Manifest not found yet. Using default simulations.');
             }
