@@ -1,0 +1,21 @@
+{
+  "title": "Narrow Passage Simulation",
+  "description": "This simulation demonstrates RNCOA working effectively by navigating through a narrow passage, controlled via NMPC controller. Using a substantially reduced prediction horizon of 0.25 seconds. The boundary configuration is 'B' from fig. 2",
+  "date": "2026-03-05",
+  "category": "NMPC|quadrotor|dynamic|obstacle avoidance",
+  "parameters": {
+    "environment": "Passage limited to narrow slit",
+    "robot_type": "Quadrotor with 2D boundary",
+    "num_obstacles": Narrow passage,
+    "environment_size": "5m x 5m",
+    "max_velocity": "12 m/s",
+    "computation_time": "2.5 seconds"
+  },
+  "results": {
+    "success": true,
+    "path_length": "~18 meters",
+    "time_to_goal": "NA",
+    "collisions": 0,
+    "notes": "Successfully completed navigation"
+  }
+}
