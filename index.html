@@ -343,13 +343,13 @@
 
     <script>
         let simulations = [];
-        let availableCategories = new Set();
+        let availableScenarios = new Set();
         let currentFilter = 'all';
 
         /**
          * Transform metadata.json format to card format
          */
-        function transformMetadata(metadata) {
+        function transformMetadata(metadata, scenarioTitle) {
             if (!metadata.configurations || metadata.configurations.length === 0) {
                 return null;
             }
@@ -357,20 +357,19 @@
             const config = metadata.configurations[0];
             const views = config.views ? config.views.map(view => ({
                 name: view.name,
-                video: view.video,
+                video: encodeURI(view.video),
                 description: view.description
             })) : [];
 
             if (views.length === 0) return null;
 
-            const category = metadata.category ? metadata.category.split('|')[0].toLowerCase() : 'other';
-            availableCategories.add(category);
+            availableScenarios.add(scenarioTitle);
 
             return {
                 id: Math.random().toString(36).substr(2, 9),
                 title: metadata.title,
                 description: metadata.description,
-                category: category,
+                scenario: scenarioTitle,
                 date: metadata.date,
                 views: views,
                 tags: metadata.category ? metadata.category.split('|') : [],
@@ -384,7 +383,7 @@
         async function loadSimulations() {
             try {
                 // Load manifest
-                const manifestResponse = await fetch('simulations/manifest.json');
+                const manifestResponse = await fetch(encodeURI('simulations/manifest.json'));
                 if (!manifestResponse.ok) throw new Error('Manifest not found');
                 const manifest = await manifestResponse.json();
 
@@ -392,10 +391,13 @@
                 const loadedSimulations = [];
                 for (const scenario of manifest.scenarios) {
                     try {
-                        const metadataResponse = await fetch(scenario.path);
+                        const metadataResponse = await fetch(encodeURI(scenario.path));
                         if (metadataResponse.ok) {
                             const metadata = await metadataResponse.json();
-                            const simulation = transformMetadata(metadata);
+                            // Extract scenario name from path (e.g., "Dictating Spatial Homotopy" from "simulations/Dictating Spatial Homotopy/metadata.json")
+                            const pathParts = scenario.path.split('/');
+                            const scenarioTitle = pathParts[pathParts.length - 2];
+                            const simulation = transformMetadata(metadata, scenarioTitle);
                             if (simulation) {
                                 loadedSimulations.push(simulation);
                             }
@@ -416,21 +418,18 @@
         }
 
         /**
-         * Update filter buttons based on available categories
+         * Update filter buttons based on available scenarios
          */
         function updateFilterButtons() {
             const filtersContainer = document.getElementById('filters-container');
             const baseButtons = `<button class="filter-btn active" onclick="filterGallery('all')">All Scenarios</button>`;
             
-            const categoryButtons = Array.from(availableCategories)
+            const scenarioButtons = Array.from(availableScenarios)
                 .sort()
-                .map(cat => {
-                    const displayName = cat.charAt(0).toUpperCase() + cat.slice(1);
-                    return `<button class="filter-btn" onclick="filterGallery('${cat}')">${displayName}</button>`;
-                })
+                .map(scenario => `<button class="filter-btn" onclick="filterGallery('${scenario}')">${scenario}</button>`)
                 .join('');
 
-            filtersContainer.innerHTML = baseButtons + categoryButtons;
+            filtersContainer.innerHTML = baseButtons + scenarioButtons;
         }
 
         /**
@@ -441,7 +440,7 @@
             const gallery = document.getElementById('gallery');
             const filtered = filter === 'all' 
                 ? simulations 
-                : simulations.filter(sim => sim.category === filter);
+                : simulations.filter(sim => sim.scenario === filter);
 
             if (filtered.length === 0) {
                 gallery.innerHTML = `
@@ -529,12 +528,12 @@
         }
 
         /**
-         * Filter gallery by category
+         * Filter gallery by scenario
          */
-        function filterGallery(category) {
+        function filterGallery(scenario) {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            renderGallery(category);
+            renderGallery(scenario);
         }
 
         /**
