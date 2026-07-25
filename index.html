@@ -349,9 +349,7 @@
         /**
          * Transform metadata.json format to card format
          */
-        function transformMetadata(metadata, scenarioPath) {
-            const baseDir = scenarioPath.substring(0, scenarioPath.lastIndexOf('/'));
-            
+        function transformMetadata(metadata) {
             if (!metadata.configurations || metadata.configurations.length === 0) {
                 return null;
             }
@@ -359,7 +357,7 @@
             const config = metadata.configurations[0];
             const views = config.views ? config.views.map(view => ({
                 name: view.name,
-                video: `${baseDir}/${view.video}`,
+                video: view.video,
                 description: view.description
             })) : [];
 
@@ -397,7 +395,7 @@
                         const metadataResponse = await fetch(scenario.path);
                         if (metadataResponse.ok) {
                             const metadata = await metadataResponse.json();
-                            const simulation = transformMetadata(metadata, scenario.path);
+                            const simulation = transformMetadata(metadata);
                             if (simulation) {
                                 loadedSimulations.push(simulation);
                             }
