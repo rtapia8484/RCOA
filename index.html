@@ -349,32 +349,39 @@
         /**
          * Transform metadata.json format to card format
          */
-        function transformMetadata(metadata, scenarioTitle) {
+        /**
+         * Transform metadata.json format to card format (one card per configuration)
+         */
+        function transformMetadata(metadata, folderTitle) {
             if (!metadata.configurations || metadata.configurations.length === 0) {
-                return null;
+                return [];
             }
 
-            const config = metadata.configurations[0];
-            const views = config.views ? config.views.map(view => ({
-                name: view.name,
-                video: encodeURI(view.video),
-                description: view.description
-            })) : [];
+            // Map each configuration into a separate simulation card object
+            return metadata.configurations.map(config => {
+                const views = config.views ? config.views.map(view => ({
+                    name: view.name,
+                    video: encodeURI(view.video),
+                    description: view.description
+                })) : [];
 
-            if (views.length === 0) return null;
+                if (views.length === 0) return null;
 
-            availableScenarios.add(scenarioTitle);
+                // Use the configuration's unique name as the filter category
+                const scenarioTitle = config.name;
+                availableScenarios.add(scenarioTitle);
 
-            return {
-                id: Math.random().toString(36).substr(2, 9),
-                title: metadata.title,
-                description: metadata.description,
-                scenario: scenarioTitle,
-                date: metadata.date,
-                views: views,
-                tags: metadata.category ? metadata.category.split('|') : [],
-                environment: config.parameters?.environment_size || 'Unknown'
-            };
+                return {
+                    id: Math.random().toString(36).substr(2, 9),
+                    title: metadata.title,
+                    description: metadata.description,
+                    scenario: scenarioTitle,
+                    date: metadata.date,
+                    views: views,
+                    tags: metadata.category ? metadata.category.split('|') : [],
+                    environment: config.parameters?.environment_size || 'Unknown'
+                };
+            }).filter(Boolean); // Remove any null entries
         }
 
         /**
