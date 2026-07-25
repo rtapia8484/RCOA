@@ -237,6 +237,30 @@
             margin-bottom: 10px;
         }
 
+        .loading-state {
+            text-align: center;
+            color: #cbd5e0;
+            padding: 40px 20px;
+            font-size: 1.1em;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #2d3748;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         footer {
             text-align: center;
             color: #a0aec0;
@@ -244,6 +268,13 @@
             opacity: 0.9;
             font-size: 0.9em;
             border-top: 1px solid #2d3748;
+        }
+
+        .error-state {
+            grid-column: 1/-1;
+            text-align: center;
+            color: #fc8181;
+            padding: 40px 20px;
         }
 
         @media (max-width: 768px) {
@@ -292,69 +323,123 @@
             </div>
         </header>
 
-        <div class="filters">
+        <div class="filters" id="filters-container">
             <button class="filter-btn active" onclick="filterGallery('all')">All Scenarios</button>
-            <button class="filter-btn" onclick="filterGallery('dense')">Dense Obstacles</button>
-            <button class="filter-btn" onclick="filterGallery('narrow')">Narrow Passages</button>
-            <button class="filter-btn" onclick="filterGallery('dynamic')">Dynamic Obstacles</button>
         </div>
 
         <div class="gallery" id="gallery">
-            <div class="empty-state">
-                <h2>📂 No simulations yet</h2>
-                <p>Check back soon! Add simulation results to the <code>/simulations</code> folder.</p>
+            <div style="grid-column: 1/-1;">
+                <div class="loading-state">
+                    <span class="loading-spinner"></span>Loading simulations...
+                </div>
             </div>
         </div>
 
         <footer>
-            <p>RCOA Simulation Results Gallery | Last updated: 2026-07-20</p>
+            <p>RCOA Simulation Results Gallery</p>
             <p>By: Ricardo Tapia and Iman Soltani | Systems and Control (eess.SY)</p>
         </footer>
     </div>
 
     <script>
-        // Simulation data structure with multiple views support
-        const simulations = [
-            {
-                id: 1,
-                title: "Narrow Passage Navigation",
-                description: "Quadrotor navigating through narrow passage",
-                category: "dense",
-                date: "2026-07-20",
-                views: [
-                    {
-                        name: "Front View",
-                        video: "simulations/Narrow Passage/NarrowPassage_FrontView.mp4",
-                        description: "Bird's eye view of the quadrotors trajectory"
-                    },
-                    {
-                        name: "Top View",
-                        video: "simulations/Narrow Passage/NarrowPassage_TopView.mp4",
-                        description: "Top perspective showing obstacle clearance"
-                    }
-                ],
-                tags: ["Narrow Passage", "NMPC"],
-                environment: "Indoor"
-            },
-            {
-                id: 2,
-                title: "Narrow Passage Navigation",
-                description: "Successfully navigating through narrow passages with minimal clearance",
-                category: "narrow",
-                date: "2026-07-20",
-                views: [
-                    {
-                        name: "Main View",
-                        video: "simulations/scenario_2/results.mp4",
-                        description: "Primary visualization of narrow passage navigation"
-                    }
-                ],
-                tags: ["Narrow", "Challenging"],
-                environment: "Corridor"
-            }
-        ];
+        let simulations = [];
+        let availableCategories = new Set();
+        let currentFilter = 'all';
 
+        /**
+         * Transform metadata.json format to card format
+         */
+        function transformMetadata(metadata, scenarioPath) {
+            const baseDir = scenarioPath.substring(0, scenarioPath.lastIndexOf('/'));
+            
+            if (!metadata.configurations || metadata.configurations.length === 0) {
+                return null;
+            }
+
+            const config = metadata.configurations[0];
+            const views = config.views ? config.views.map(view => ({
+                name: view.name,
+                video: `${baseDir}/${view.video}`,
+                description: view.description
+            })) : [];
+
+            if (views.length === 0) return null;
+
+            const category = metadata.category ? metadata.category.split('|')[0].toLowerCase() : 'other';
+            availableCategories.add(category);
+
+            return {
+                id: Math.random().toString(36).substr(2, 9),
+                title: metadata.title,
+                description: metadata.description,
+                category: category,
+                date: metadata.date,
+                views: views,
+                tags: metadata.category ? metadata.category.split('|') : [],
+                environment: config.parameters?.environment_size || 'Unknown'
+            };
+        }
+
+        /**
+         * Load and parse metadata files from manifest
+         */
+        async function loadSimulations() {
+            try {
+                // Load manifest
+                const manifestResponse = await fetch('simulations/manifest.json');
+                if (!manifestResponse.ok) throw new Error('Manifest not found');
+                const manifest = await manifestResponse.json();
+
+                // Load each metadata file
+                const loadedSimulations = [];
+                for (const scenario of manifest.scenarios) {
+                    try {
+                        const metadataResponse = await fetch(scenario.path);
+                        if (metadataResponse.ok) {
+                            const metadata = await metadataResponse.json();
+                            const simulation = transformMetadata(metadata, scenario.path);
+                            if (simulation) {
+                                loadedSimulations.push(simulation);
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`Failed to load ${scenario.path}:`, error);
+                    }
+                }
+
+                simulations = loadedSimulations;
+                updateFilterButtons();
+                renderGallery('all');
+
+            } catch (error) {
+                console.error('Failed to load simulations:', error);
+                displayError('Failed to load simulations. Check the browser console for details.');
+            }
+        }
+
+        /**
+         * Update filter buttons based on available categories
+         */
+        function updateFilterButtons() {
+            const filtersContainer = document.getElementById('filters-container');
+            const baseButtons = `<button class="filter-btn active" onclick="filterGallery('all')">All Scenarios</button>`;
+            
+            const categoryButtons = Array.from(availableCategories)
+                .sort()
+                .map(cat => {
+                    const displayName = cat.charAt(0).toUpperCase() + cat.slice(1);
+                    return `<button class="filter-btn" onclick="filterGallery('${cat}')">${displayName}</button>`;
+                })
+                .join('');
+
+            filtersContainer.innerHTML = baseButtons + categoryButtons;
+        }
+
+        /**
+         * Render gallery with filter
+         */
         function renderGallery(filter = 'all') {
+            currentFilter = filter;
             const gallery = document.getElementById('gallery');
             const filtered = filter === 'all' 
                 ? simulations 
@@ -364,8 +449,8 @@
                 gallery.innerHTML = `
                     <div style="grid-column: 1/-1;">
                         <div class="empty-state">
-                            <h2>No simulations found</h2>
-                            <p>Try a different filter or check back later.</p>
+                            <h2>📂 No simulations found</h2>
+                            <p>Try a different filter or add simulation metadata files.</p>
                         </div>
                     </div>
                 `;
@@ -382,7 +467,8 @@
                             <div class="view-tabs">
                                 ${sim.views.map((view, idx) => `
                                     <button class="view-tab ${idx === 0 ? 'active' : ''}" 
-                                            onclick="switchView(${sim.id}, ${idx})">
+                                            onclick="switchView('${sim.id}', ${idx})"
+                                            data-sim-id="${sim.id}">
                                         ${view.name}
                                     </button>
                                 `).join('')}
@@ -408,6 +494,7 @@
                             <div class="card-meta">
                                 <span class="meta-tag">📍 ${sim.environment}</span>
                                 <span class="meta-tag">📅 ${sim.date}</span>
+                                ${sim.tags.map(tag => `<span class="meta-tag">${tag}</span>`).join('')}
                             </div>
                         </div>
                     </div>
@@ -415,6 +502,9 @@
             }).join('');
         }
 
+        /**
+         * Switch video view in a card
+         */
         function switchView(simId, viewIndex) {
             const simulation = simulations.find(s => s.id === simId);
             if (!simulation || !simulation.views[viewIndex]) return;
@@ -440,29 +530,30 @@
             });
         }
 
+        /**
+         * Filter gallery by category
+         */
         function filterGallery(category) {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             renderGallery(category);
         }
 
-        // Initial render
-        renderGallery();
-
-        // Load simulations from metadata files (future enhancement)
-        async function loadSimulations() {
-            try {
-                // This will be populated as you add metadata.json files
-                // Example implementation:
-                // const response = await fetch('simulations/manifest.json');
-                // const data = await response.json();
-                // This would dynamically load all scenarios
-            } catch (error) {
-                console.log('Manifest not found yet. Using default simulations.');
-            }
+        /**
+         * Display error message
+         */
+        function displayError(message) {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = `
+                <div class="error-state">
+                    <h2>⚠️ Error</h2>
+                    <p>${message}</p>
+                </div>
+            `;
         }
 
-        loadSimulations();
+        // Load simulations on page load
+        document.addEventListener('DOMContentLoaded', loadSimulations);
     </script>
 </body>
 </html>

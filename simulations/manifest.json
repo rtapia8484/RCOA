@@ -1,0 +1,10 @@
+{
+  "scenarios": [
+    {
+      "path": "simulations/Dictating Spatial Homotopy/metadata.json"
+    },
+    {
+      "path": "simulations/Narrow Passage/metadata.json"
+    }
+  ]
+}
