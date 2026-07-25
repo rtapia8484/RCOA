@@ -33,6 +33,36 @@
         "collisions": 0,
         "notes": "Successfully completed navigation"
       }
+    },
+    {
+      "name": "EOA vs EEOA A1D",
+      "parameters": {
+        "environment": "",
+        "robot_type": "Quadrotor with 3D boundary",
+        "num_obstacles": null,
+        "environment_size": "10m x 5m",
+        "max_velocity": "12 m/s",
+        "computation_time": "RNCOA 4.8sec, DMDOA 3.75 seconds"
+      },
+      "views": [
+        {
+          "name": "RNCOA",
+          "video": "simulations/Dictating Spatial Homotopy/RNCOA_A2D.mp4",
+          "description": "RNCOA path A2 configuration D"
+        },
+        {
+          "name": "DMDOA",
+          "video": "simulations/Dictating Spatial Homotopy/DMDOA_A2D.mp4",
+          "description": "DMDOA path A2 configuration D"
+        }
+      ],
+      "results": {
+        "success": true,
+        "path_length": ">20 meters",
+        "time_to_goal": "NA",
+        "collisions": 0,
+        "notes": "Successfully completed navigation"
+      }
     }
   ]
 }
