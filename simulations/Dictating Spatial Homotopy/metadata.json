@@ -17,12 +17,12 @@
       "views": [
         {
           "name": "RNCOA",
-          "video": "RNCOA_A2D.mp4",
+          "video": "simulations/Dictating Spatial Homotopy/RNCOA_A2D.mp4",
           "description": "RNCOA path A2 configuration D"
         },
         {
           "name": "DMDOA",
-          "video": "DMDOA_A2D.mp4",
+          "video": "simulations/Dictating Spatial Homotopy/DMDOA_A2D.mp4",
           "description": "DMDOA path A2 configuration D"
         }
       ],
