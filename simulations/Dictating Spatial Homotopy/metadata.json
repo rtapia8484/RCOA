@@ -1,33 +1,39 @@
 {
-  "title": "Narrow Passage Simulation",
-  "description": "This simulation demonstrates RNCOA working effectively by navigating through a narrow passage, controlled via NMPC controller. Using a substantially reduced prediction horizon of 0.25 seconds. The boundary configuration is 'B' from fig. 2",
+  "title": "Dictating Spatial Homotopy",
+  "description": "These simulations have a predefined spatial homotopy using corresponding constraints around two obstacles, in proximity with each other; observe the differences in the paths.",
   "date": "2026-03-05",
-  "category": "NMPC|quadrotor|dynamic|obstacle avoidance",
-  "parameters": {
-    "environment": "Passage limited to narrow slit",
-    "robot_type": "Quadrotor with 2D boundary",
-    "num_obstacles": NA,
-    "environment_size": "5m x 5m",
-    "max_velocity": "12 m/s",
-    "computation_time": "2.5 seconds"
-  },
-  "views": [
-    {
-      "name": "Front View",
-      "video": "NarrowPassage_FrontView.mp4",
-      "description": "Bird's eye view of the quadrotor's trajectory"
+  "category": "quadrotor|dynamic|obstacle avoidance",
+  "configurations": [
+  {
+    "name": "RNCOA vs DMDOA A2D",
+    "parameters": {
+      "environment": "",
+      "robot_type": "Quadrotor with 3D boundary",
+      "num_obstacles": NA,
+      "environment_size": "5m x 5m",
+      "max_velocity": "12 m/s",
+      "computation_time": "RNCOA 4.8sec, DMDOA 3.75 seconds"
     },
-    {
-      "name": "Top View",
-      "video": "NarrowPassage_TopView.mp4",
-      "description": "Top view of the quadrotor's trajectory"
+    "views": [
+      {
+        "name": "RNCOA",
+        "video": "RNCOA_A2D.mp4",
+        "description": "RNCOA path A2 configuration D"
+      },
+      {
+        "name": "DMDOA",
+        "video": "DMDOA_A2D.mp4",
+        "description": "DMDOA path A2 configuration D"
+      }
+    ],
+    "results": {
+      "success": true,
+      "path_length": ">20 meters",
+      "time_to_goal": "NA",
+      "collisions": 0,
+      "notes": "Successfully completed navigation"
     }
-  ],
-  "results": {
-    "success": true,
-    "path_length": "~18 meters",
-    "time_to_goal": "NA",
-    "collisions": 0,
-    "notes": "Successfully completed navigation"
   }
+  ],
+  
 }
