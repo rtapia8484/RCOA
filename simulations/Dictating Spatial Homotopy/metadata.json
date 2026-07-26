@@ -54,6 +54,11 @@
           "name": "EEOA",
           "video": "simulations/Dictating Spatial Homotopy/EEOA_A1D.mp4",
           "description": "EEOA path A1 configuration D"
+        },
+        {
+          "name": "RNCOA",
+          "video": "simulations/Dictating Spatial Homotopy/RNCOA_A1D.mp4",
+          "description": "RNCOA path A1 configuration D"
         }
       ],
       "results": {
