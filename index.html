@@ -357,9 +357,10 @@
                 return [];
             }
 
-            // Use metadata.title for the filter category as requested
-            const fileTitle = metadata.title;
-            availableScenarios.add(fileTitle);
+            // Add only the file title to the filters once per metadata file
+            if (metadata.title) {
+                availableScenarios.add(metadata.title);
+            }
 
             return metadata.configurations.map(config => {
                 const views = config.views ? config.views.map(view => ({
@@ -372,9 +373,9 @@
 
                 return {
                     id: Math.random().toString(36).substr(2, 9),
-                    title: config.name, // Use configuration name as the card heading
+                    title: config.name,
                     description: metadata.description,
-                    scenario: fileTitle, // Filter category points to metadata.title[cite: 12]
+                    scenario: metadata.title, // Ties the card's filter category directly to metadata.title[cite: 14]
                     date: metadata.date,
                     views: views,
                     tags: metadata.category ? metadata.category.split('|') : [],
