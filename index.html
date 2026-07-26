@@ -387,6 +387,9 @@
         /**
          * Load and parse metadata files from manifest
          */
+        /**
+         * Load and parse metadata files from manifest
+         */
         async function loadSimulations() {
             try {
                 // Load manifest
@@ -403,10 +406,10 @@
                             const metadata = await metadataResponse.json();
                             // Extract scenario name from path (e.g., "Dictating Spatial Homotopy" from "simulations/Dictating Spatial Homotopy/metadata.json")
                             const pathParts = scenario.path.split('/');
-                            const scenarioTitle = pathParts[pathParts.length - 2];
-                            const simulation = transformMetadata(metadata, scenarioTitle);
-                            if (simulation) {
-                                loadedSimulations.push(simulation);
+                            const folderTitle = pathParts[pathParts.length - 2];
+                            const simulationCards = transformMetadata(metadata, folderTitle);
+                            if (simulationCards && simulationCards.length > 0) {
+                                loadedSimulations.push(...simulationCards);
                             }
                         }
                     } catch (error) {
