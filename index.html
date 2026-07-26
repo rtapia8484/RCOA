@@ -357,7 +357,10 @@
                 return [];
             }
 
-            // Map each configuration into a separate simulation card object
+            // Use metadata.title for the filter category as requested
+            const fileTitle = metadata.title;
+            availableScenarios.add(fileTitle);
+
             return metadata.configurations.map(config => {
                 const views = config.views ? config.views.map(view => ({
                     name: view.name,
@@ -367,26 +370,19 @@
 
                 if (views.length === 0) return null;
 
-                // Use the configuration's unique name as the filter category
-                const scenarioTitle = config.name;
-                availableScenarios.add(scenarioTitle);
-
                 return {
                     id: Math.random().toString(36).substr(2, 9),
-                    title: metadata.title,
+                    title: config.name, // Use configuration name as the card heading
                     description: metadata.description,
-                    scenario: scenarioTitle,
+                    scenario: fileTitle, // Filter category points to metadata.title[cite: 12]
                     date: metadata.date,
                     views: views,
                     tags: metadata.category ? metadata.category.split('|') : [],
                     environment: config.parameters?.environment_size || 'Unknown'
                 };
-            }).filter(Boolean); // Remove any null entries
+            }).filter(Boolean);
         }
 
-        /**
-         * Load and parse metadata files from manifest
-         */
         /**
          * Load and parse metadata files from manifest
          */
